@@ -6,7 +6,7 @@ namespace WinFormsApp2
 {
     public partial class Form1 : Form
     {
-        public Image originalImage { get; private set; }
+        public Bitmap originalImage { get; private set; }
 
         public Form1()
         {
@@ -41,13 +41,13 @@ namespace WinFormsApp2
                 if (pictureBox1.Image != null)
                 {
 
-                    Image downsizedImage = DownsizeImage(pictureBox1.Image, downscaleFactor);
+                    Bitmap downsizedImage = DownsizeImage((Bitmap)pictureBox1.Image, downscaleFactor);
                     pictureBox1.Image = downsizedImage;
                 }
             }
         }
 
-        private Image DownsizeImage(Image originalImage, double downscaleFactor)
+        private Bitmap DownsizeImage(Bitmap originalImage, double downscaleFactor)
         {
             int newWidth = (int)(originalImage.Width * downscaleFactor / 100);
             int newHeight = (int)(originalImage.Height * downscaleFactor / 100);
@@ -55,14 +55,19 @@ namespace WinFormsApp2
 
             Bitmap downsizedBitmap = new Bitmap(newWidth, newHeight);
 
-            using (Graphics g = Graphics.FromImage(downsizedBitmap))
+            for (int i = 0; i < newHeight; i++)
             {
+                for (int j = 0; j < newWidth; j++)
+                {
+                    int X = (int)(i / downscaleFactor * originalImage.Width);
+                    int Y = (int)(j / downscaleFactor * originalImage.Height);
 
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-                g.DrawImage(originalImage, 0, 0, newWidth, newHeight);
+                    Color averageColor = originalImage.GetPixel(X, Y);
+
+                    downsizedBitmap.SetPixel(i, j, averageColor);
+                }
             }
+
             return downsizedBitmap;
         }
 
